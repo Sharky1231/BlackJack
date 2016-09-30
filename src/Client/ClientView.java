@@ -73,7 +73,6 @@ public class ClientView extends JFrame {
 
         textArea.setColumns(20);
         textArea.setRows(5);
-        textArea.setEnabled(false);
         jScrollPane1.setViewportView(textArea);
 
         jLabel1.setText("Timer:");
