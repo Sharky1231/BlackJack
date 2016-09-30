@@ -13,8 +13,6 @@ public class ServerView extends JFrame {
 
     public ServerView() {
         initComponents();
-        registerEvents();
-        setVisible(true);
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(startButton);
     }
@@ -24,23 +22,25 @@ public class ServerView extends JFrame {
         textArea.append(text + " \n");
     }
 
-    public void registerEvents() {
-        ActionListener listener = new ButtonHandler();
+    public void registerEvents(ServerController controller) {
+        ActionListener listener = new ButtonHandler(controller);
         startButton.addActionListener(listener);
         stopButton.addActionListener(listener);
     }
 
     private class ButtonHandler implements ActionListener {
-        public void actionPerformed(ActionEvent event) {
-            if (event.getSource() == startButton) {
-                // do something
-                addText("STARTED");
-            }
-            else if (event.getSource() == stopButton) {
-                // do something
-                addText("STOPPED");
-            }
+        ServerController controller;
+        public ButtonHandler(ServerController controller) {
+            this.controller = controller;
         }
+
+        public void actionPerformed(ActionEvent event) {
+            controller.handleButtonEvent(event);
+        }
+    }
+
+    public void open(){
+        setVisible(true);
     }
 
     private void initComponents() {

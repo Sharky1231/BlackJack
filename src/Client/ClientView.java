@@ -1,6 +1,8 @@
 package Client;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class ClientView extends JFrame {
     private javax.swing.JButton joinButton;
@@ -23,7 +25,6 @@ public class ClientView extends JFrame {
 
     public ClientView() {
         initComponents();
-        setVisible(true);
         setLocationRelativeTo(null);
     }
 
@@ -164,4 +165,28 @@ public class ClientView extends JFrame {
 
         pack();
     }// </editor-fold>
+
+    public void open() {
+        setVisible(true);
+    }
+
+    public void registerEvents(ClientController controller) {
+        ActionListener listener = new ButtonHandler(controller);
+        joinButton.addActionListener(listener);
+        anotherCardButton.addActionListener(listener);
+        betButton.addActionListener(listener);
+        stayButton.addActionListener(listener);
+        leaveButton.addActionListener(listener);
+    }
+
+    private class ButtonHandler implements ActionListener {
+        ClientController controller;
+        public ButtonHandler(ClientController controller) {
+            this.controller = controller;
+        }
+
+        public void actionPerformed(ActionEvent event) {
+            controller.handleButtonEvent(event);
+        }
+    }
 }
