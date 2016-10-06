@@ -1,15 +1,14 @@
 package Server;
 
 
-import Common.GameProtocol;
+import Server.Reactor.ConcreteHandlers.ConnectionHandler;
+import Server.Reactor.ConcreteHandlers.GameHandler;
+import Common.EventType;
+import Server.Reactor.Reactor;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.IOException;
 
 public class ServerController {
 
@@ -23,12 +22,34 @@ public class ServerController {
     public void startServer()
     {
         try{
-            ServerSocket serverSocket = new ServerSocket(6666);
-            Socket clientSocket = serverSocket.accept();
-            PrintWriter out =
-                    new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Reactor reactor = null;
+                    try {
+                        reactor = Reactor.getInstance();
+                        ConnectionHandler connectionHandler = new ConnectionHandler();
+                        GameHandler gameHandler = new GameHandler();
+
+                        reactor.register_handler(EventType.CONNECT, connectionHandler);
+                        reactor.register_handler(EventType.BET, gameHandler);
+
+                        reactor.handle_events();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+            t1.start();
+
+
+
+//            Socket clientSocket = serverSocket.accept();
+//            PrintWriter out =
+//                    new PrintWriter(clientSocket.getOutputStream(), true);
+//            BufferedReader in = new BufferedReader(
+//                    new InputStreamReader(clientSocket.getInputStream()));
 
 //            String inputLine, outputLine;
 //

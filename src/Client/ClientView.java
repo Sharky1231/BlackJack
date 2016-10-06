@@ -3,6 +3,7 @@ package Client;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class ClientView extends JFrame {
     private javax.swing.JButton joinButton;
@@ -185,7 +186,13 @@ public class ClientView extends JFrame {
         }
 
         public void actionPerformed(ActionEvent event) {
-            controller.handleButtonEvent(event);
+            try {
+                controller.handleButtonEvent(event);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
