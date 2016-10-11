@@ -58,7 +58,7 @@ public class ClientView extends JFrame {
 
         joinButton.setText("Join game");
 
-        leaveButton.setText("Leave");
+        leaveButton.setText("Exit");
 
         betButton.setText("Bet");
         betButton.setToolTipText("");

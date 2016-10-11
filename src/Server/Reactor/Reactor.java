@@ -26,7 +26,6 @@ public class Reactor implements IReactor {
         this.demultiplexer = Selector.open();
     }
 
-    ;
 
     public static Reactor getInstance() throws IOException {
         if (reactor == null)
@@ -41,6 +40,7 @@ public class Reactor implements IReactor {
 
     @Override
     public void register_handler(EventType eventType, IEventHandler handler) {
+        //Handle handle = handler.getHandle();
         registeredHandlers.put(eventType, handler);
     }
 
@@ -62,9 +62,7 @@ public class Reactor implements IReactor {
             while (true) {
                 System.out.println("Waiting for select...");
 
-                int noOfKeys = demultiplexer.select();
-
-                System.out.println("Number of selected keys: " + noOfKeys);
+                demultiplexer.select();
 
                 Set selectedKeys = demultiplexer.selectedKeys();
                 Iterator iter = selectedKeys.iterator();

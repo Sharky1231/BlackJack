@@ -1,6 +1,7 @@
 package Server;
 
 
+import Common.Game.Game;
 import Server.Reactor.ConcreteHandlers.ConnectionHandler;
 import Server.Reactor.ConcreteHandlers.GameHandler;
 import Common.EventType;
@@ -25,9 +26,10 @@ public class ServerController {
             Thread t1 = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Reactor reactor = null;
                     try {
-                        reactor = Reactor.getInstance();
+                        Reactor reactor = Reactor.getInstance();
+                        Game game = Game.getInstance();
+                        game.startGame();
                         ConnectionHandler connectionHandler = new ConnectionHandler();
                         GameHandler gameHandler = new GameHandler();
 
@@ -63,14 +65,15 @@ public class ServerController {
         }
     }
 
-    public void handleButtonEvent(ActionEvent e){
+    public void handleButtonEvent(ActionEvent e) {
         if (((JButton) e.getSource()).getText().startsWith("START")) {
             view.addText("Server is warming up...");
             startServer();
             view.addText("Server started!");
         }
         else if (((JButton) e.getSource()).getText().startsWith("STOP")) {
-            view.addText("Server shut down.");
+            view.addText("Server shuts down.");
+            System.exit(0);
         }
     }
 }

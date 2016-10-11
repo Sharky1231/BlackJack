@@ -1,6 +1,8 @@
 package Server.Reactor.ConcreteHandlers;
 
 import Common.EventType;
+import Common.Game.Player;
+import Common.Game.Game;
 import Server.Reactor.Handle;
 import Server.Reactor.Interfaces.IEventHandler;
 import Server.Reactor.Reactor;
@@ -23,6 +25,7 @@ public class ConnectionHandler implements IEventHandler {
                 client.configureBlocking(false);
 
                 // Add the new connection to the selector
+                Game.getInstance().addPlayer(new Player(5, 100));
                 client.register(Reactor.getInstance().getDemultiplexer(), SelectionKey.OP_READ);
 
                 System.out.println("Accepted new connection from client: " + client);

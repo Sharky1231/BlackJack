@@ -60,7 +60,7 @@ public class ServerView extends JFrame {
         jScrollPane1.setViewportView(textArea);
 
         startButton.setText("START");
-        stopButton.setText("STOP");
+        stopButton.setText("EXIT");
 
         label1.setText("Information");
 

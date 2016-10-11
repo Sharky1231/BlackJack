@@ -39,7 +39,7 @@ public class ClientController {
 //            view.addText("Connected!");
 //            out.println("Client connected.");
 
-            InetSocketAddress hostAddress = new InetSocketAddress("localhost", 6666);
+            InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
             SocketChannel client = SocketChannel.open(hostAddress);
 
             System.out.println("Client sending messages to server...");
@@ -52,11 +52,8 @@ public class ClientController {
             System.out.println(message);
             client.write(buffer);
             buffer.clear();
-            Thread.sleep(2000);
-            System.out.println("CLIENT DIED.");
             client.close();
 
-            Thread.sleep(3000);
 //            // Send messages to server
 //            String [] messages = new String [] {"Time goes fast.", "What now?", "Bye."};
 //            for (int i = 0; i < messages.length; i++) {
@@ -67,7 +64,6 @@ public class ClientController {
 //                buffer.clear();
 //                Thread.sleep(3000);
 //            }
-            client.close();
         }
 
         catch (Exception e){
@@ -81,8 +77,9 @@ public class ClientController {
             view.addText("Connecting to the game...");
             connect();
         }
-        else if (((JButton) e.getSource()).getText().startsWith("Leave")) {
+        else if (((JButton) e.getSource()).getText().startsWith("Exit")) {
             view.addText("Disconnected.");
+            System.exit(0);
         }
         else if (((JButton) e.getSource()).getText().startsWith("Bet")) {
             view.addText("Bet");

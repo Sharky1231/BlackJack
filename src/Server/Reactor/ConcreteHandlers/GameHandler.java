@@ -14,6 +14,7 @@ public class GameHandler implements IEventHandler {
         EventType eventType = handle.getMessageWrapper().getEventType();
         switch (eventType){
             case BET:{
+                // Do whatever needs to be done in the server. Write to handle to return results.
                 System.out.println("BET EVENT EXECUTED");
                 break;
             }
