@@ -1,20 +1,16 @@
 package Client;
 
-import Client.Messages.BetMessage;
-import Client.Messages.MessageWrapper;
+import Common.Messages.BetMessage;
+import Common.Messages.MessageWrapper;
 import Common.EventType;
 import Common.Serializer;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
 import java.awt.event.ActionEvent;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Scanner;
 
 public class ClientController {
     private ClientView view;

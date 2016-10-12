@@ -1,6 +1,4 @@
-package Client.Messages;
-
-import Common.EventType;
+package Common.Messages;
 
 import java.io.Serializable;
 
