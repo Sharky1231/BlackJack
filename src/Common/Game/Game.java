@@ -1,10 +1,13 @@
 package Common.Game;
 
+import Server.ClientCommunicationManager;
+
 import Common.EventType;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 public class Game {
     private ArrayList<Player> players;
@@ -28,7 +31,7 @@ public class Game {
         this.players = new ArrayList<>();
         this.cardPack = new CardPack();
         this.gameInProgress = false;
-        this.dealer = new Player(1, 1500);
+        this.dealer = new Player(UUID.randomUUID(), 1500);
         this.currentPlayer = null;
         addPlayer(dealer);
     }

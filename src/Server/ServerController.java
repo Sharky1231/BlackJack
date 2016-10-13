@@ -34,6 +34,7 @@ public class ServerController {
                         GameHandler gameHandler = new GameHandler();
 
                         reactor.register_handler(EventType.CONNECT, connectionHandler);
+                        reactor.register_handler(EventType.JOIN, gameHandler);
                         reactor.register_handler(EventType.BET, gameHandler);
 
                         reactor.handle_events();

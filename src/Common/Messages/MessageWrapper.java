@@ -1,4 +1,4 @@
-package Client.Messages;
+package Common.Messages;
 
 import Common.EventType;
 

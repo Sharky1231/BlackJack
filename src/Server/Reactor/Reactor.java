@@ -1,15 +1,13 @@
 package Server.Reactor;
 
 
-import Client.Messages.BetMessage;
-import Client.Messages.MessageWrapper;
+import Common.Messages.MessageWrapper;
 import Common.EventType;
 import Common.Serializer;
 import Server.Reactor.Interfaces.IEventHandler;
 import Server.Reactor.Interfaces.IReactor;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
@@ -84,10 +82,12 @@ public class Reactor implements IReactor {
 
                         // Read the data from client
                         IEventHandler handler = registeredHandlers.get(wrapper.getEventType());
-                        Handle handle = new Handle(wrapper, null, null);
+                        Handle handle = new Handle(wrapper, null, client);
                         handler.handleEvent(handle);
 
-                        client.close();
+                        //client.write(buffer);
+
+                        //client.close();
                         System.out.println("Client messages are complete; close.");
                     }
                     iter.remove();

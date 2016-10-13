@@ -1,7 +1,6 @@
 package Server.Reactor;
 
-import Client.Messages.MessageWrapper;
-import Common.EventType;
+import Common.Messages.MessageWrapper;
 
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;

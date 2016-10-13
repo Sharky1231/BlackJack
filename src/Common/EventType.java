@@ -2,5 +2,5 @@ package Common;
 
 
 public enum EventType {
-    CONNECT, BET, HIT, STAND
+    CONNECT, JOIN, BET, HIT, STAND, STATUS
 }

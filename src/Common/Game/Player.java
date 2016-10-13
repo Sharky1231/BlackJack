@@ -2,16 +2,17 @@ package Common.Game;
 
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Player {
-    private long id;
+    private UUID id;
     private int money;
     private Points score;
     private int bet;
     private boolean responded;
     private ArrayList<Card> cards;
 
-    public Player(long id, int money) {
+    public Player(UUID id, int money) {
         this.id = id;
         this.money = money;
         this.bet = 0;
@@ -48,7 +49,7 @@ public class Player {
         this.responded = responded;
     }
 
-    public long getId(){
+    public UUID getId(){
         return id;
     }
 
