@@ -71,7 +71,7 @@ public class ServerController {
             startServer();
             view.addText("Server started!");
         }
-        else if (((JButton) e.getSource()).getText().startsWith("STOP")) {
+        else if (((JButton) e.getSource()).getText().startsWith("EXIT")) {
             view.addText("Server shuts down.");
             System.exit(0);
         }

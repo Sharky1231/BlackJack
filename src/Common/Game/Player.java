@@ -4,14 +4,14 @@ package Common.Game;
 import java.util.ArrayList;
 
 public class Player {
-    private int id;
+    private long id;
     private int money;
     private Points score;
     private int bet;
     private boolean responded;
     private ArrayList<Card> cards;
 
-    public Player(int id, int money) {
+    public Player(long id, int money) {
         this.id = id;
         this.money = money;
         this.bet = 0;
@@ -40,7 +40,7 @@ public class Player {
         return score;
     }
 
-    public boolean getResponded(){
+    public boolean responded(){
         return responded;
     }
 
@@ -48,7 +48,7 @@ public class Player {
         this.responded = responded;
     }
 
-    public int getId(){
+    public long getId(){
         return id;
     }
 
@@ -62,5 +62,18 @@ public class Player {
 
     public void increaseMoney(int money) {
         this.money += money;
+    }
+
+    public void resetCards(){
+        cards = new ArrayList<>();
+    }
+
+    public String showCards(){
+        String string = "";
+        for(Card card : cards){
+            string += card.toString() + " | ";
+        }
+
+        return string;
     }
 }

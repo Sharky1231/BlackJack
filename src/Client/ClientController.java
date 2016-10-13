@@ -18,6 +18,7 @@ import java.util.Scanner;
 
 public class ClientController {
     private ClientView view;
+    // include here client id and send it with every request?
 
     public ClientController(ClientView view){
         this.view = view;
@@ -38,7 +39,6 @@ public class ClientController {
 //
 //            view.addText("Connected!");
 //            out.println("Client connected.");
-
             InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
             SocketChannel client = SocketChannel.open(hostAddress);
 

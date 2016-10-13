@@ -12,7 +12,7 @@ public class CardPack {
     }
 
     public Card getRandomCard(){
-        int randomPosition = ThreadLocalRandom.current().nextInt(0, packSize() + 1);
+        int randomPosition = ThreadLocalRandom.current().nextInt(0, packSize());
         Card card = removeCardFromDeck(randomPosition);
         return card;
     }
@@ -81,6 +81,6 @@ public class CardPack {
         cardPack.add(new Card(10, "10S"));
         cardPack.add(new Card(10, "JS"));
         cardPack.add(new Card(10, "QS"));
-        cardPack.add(new Card(10, "KS"));
+        cardPack.add(new Card(13, "KS"));
     }
 }

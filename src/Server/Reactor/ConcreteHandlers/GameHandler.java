@@ -1,6 +1,7 @@
 package Server.Reactor.ConcreteHandlers;
 
 import Common.EventType;
+import Common.Game.Game;
 import Server.Reactor.Handle;
 import Server.Reactor.Interfaces.IEventHandler;
 
@@ -15,11 +16,12 @@ public class GameHandler implements IEventHandler {
         switch (eventType){
             case BET:{
                 // Do whatever needs to be done in the server. Write to handle to return results.
-                System.out.println("BET EVENT EXECUTED");
+//                System.out.println("BET EVENT EXECUTED");
                 break;
             }
             case HIT:{
                 System.out.println("shit");
+
                 break;
             }
             case STAND:{
