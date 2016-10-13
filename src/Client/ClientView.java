@@ -33,6 +33,26 @@ public class ClientView extends JFrame {
         textArea.append(text + " \n");
     }
 
+    public void clientJoined()
+    {
+        joinButton.setEnabled(false);
+        betButton.setEnabled(true);
+    }
+
+    public void clientBetted()
+    {
+        anotherCardButton.setEnabled(true);
+        stayButton.setEnabled(true);
+
+        betButton.setEnabled(false);
+    }
+
+    public void clientStayed()
+    {
+        anotherCardButton.setEnabled(false);
+        stayButton.setEnabled(false);
+    }
+
 
     private void initComponents() {
 
