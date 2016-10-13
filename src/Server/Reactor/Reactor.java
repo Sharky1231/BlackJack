@@ -82,8 +82,10 @@ public class Reactor implements IReactor {
 
                         // Read the data from client
                         IEventHandler handler = registeredHandlers.get(wrapper.getEventType());
-                        Handle handle = new Handle(wrapper, null, null);
+                        Handle handle = new Handle(wrapper, null, client);
                         handler.handleEvent(handle);
+
+                        //client.write(buffer);
 
                         client.close();
                         System.out.println("Client messages are complete; close.");

@@ -1,6 +1,7 @@
 package Client;
 
 import Common.Messages.BetMessage;
+import Common.Messages.JoinMessage;
 import Common.Messages.MessageWrapper;
 import Common.EventType;
 import Common.Serializer;
@@ -10,10 +11,17 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.UUID;
 
 public class ClientController {
     private ClientView view;
+
+    private static UUID clientId = UUID.randomUUID();
 
     public ClientController(ClientView view){
         this.view = view;
@@ -37,18 +45,85 @@ public class ClientController {
 
             InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
             SocketChannel client = SocketChannel.open(hostAddress);
+            client.configureBlocking(false);
 
-            System.out.println("Client sending messages to server...");
+            System.out.println("Client sending messages to server...Client id: " + clientId);
 
-            BetMessage msg = new BetMessage(50);
-            MessageWrapper wrapper = new MessageWrapper(EventType.BET, msg);
+            JoinMessage msg = new JoinMessage(clientId);
+            MessageWrapper wrapper = new MessageWrapper(EventType.JOIN, msg);
 
             byte [] message = Serializer.serialize(wrapper);
             ByteBuffer buffer = ByteBuffer.wrap(message);
             System.out.println(message);
             client.write(buffer);
             buffer.clear();
-            client.close();
+
+
+            // Selector: multiplexor of SelectableChannel objects
+            Selector selector = Selector.open(); // selector is open here
+
+            int ops = client.validOps();
+
+            SelectionKey selectKy = client.register(selector, ops, null);
+
+
+            Thread t1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        // Infinite loop..
+                        // Keep client running
+                        while (true) {
+
+                            // Selects a set of keys whose corresponding channels are ready for I/O operations
+                            selector.select();
+
+                            // token representing the registration of a SelectableChannel with a Selector
+                            Set<SelectionKey> keys = selector.selectedKeys();
+                            Iterator<SelectionKey> iterator = keys.iterator();
+
+                            while (iterator.hasNext()) {
+                                SelectionKey myKey = iterator.next();
+
+                                if (myKey.isReadable()) {
+
+                                    SocketChannel clientChannel = (SocketChannel) myKey.channel();
+                                    ByteBuffer serverBuffer = ByteBuffer.allocate(1000);
+                                    clientChannel.read(serverBuffer);
+
+                                    byte[] receivedByteArray = serverBuffer.array();
+
+                                    if (receivedByteArray.length > 0) {
+                                        MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
+
+                                        view.addText(messageWrapper.getEventType().toString());
+                                    }
+
+                                }
+                                iterator.remove();
+                            }
+                        }
+                    } catch (Exception e) {
+
+                    }
+                }
+
+            } );
+            t1.start();
+//            while ( true ) {
+//
+//                ByteBuffer serverBuffer = ByteBuffer.allocate(1500);
+//                client.read(serverBuffer);
+//
+//                byte[] receivedByteArray = serverBuffer.array();
+//
+//                if (receivedByteArray.length > 0) {
+//                    //MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
+//
+//                    System.out.println(new String(receivedByteArray));
+//                }
+//            }
 
 //            // Send messages to server
 //            String [] messages = new String [] {"Time goes fast.", "What now?", "Bye."};
@@ -60,6 +135,7 @@ public class ClientController {
 //                buffer.clear();
 //                Thread.sleep(3000);
 //            }
+
         }
 
         catch (Exception e){
