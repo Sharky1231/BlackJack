@@ -1,6 +1,8 @@
 package Server;
 
+import Common.EventType;
 import Common.Messages.MessageWrapper;
+import Common.Messages.ServerToClient.StatusMessage;
 import Common.Serializer;
 import sun.plugin2.message.Message;
 
@@ -39,6 +41,10 @@ public class ClientCommunicationManager {
         sendMessageToChannel(socketChannel, message);
     }
 
+    public void sendMessageToClient(UUID clientId, String message) throws IOException {
+        sendMessageToClient (clientId, new MessageWrapper(EventType.STATUS, new StatusMessage(message)));
+    }
+
     public void broadcastMessage ( MessageWrapper message ) throws IOException {
         for ( SocketChannel clientSocketChannel : this._clients.values() )
         {
@@ -53,4 +59,13 @@ public class ClientCommunicationManager {
         socketChannel.write(buffer);
         buffer.clear();
     }
+
+    public void sendMessageToClient(SocketChannel socketChannel, MessageWrapper message) throws IOException {
+        sendMessageToChannel(socketChannel, message);
+    }
+
+    public void broadcastStatusMessage(String status) throws IOException {
+        broadcastMessage(new MessageWrapper(EventType.STATUS, new StatusMessage(status)));
+    }
+
 }

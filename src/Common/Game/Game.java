@@ -4,6 +4,7 @@ import Server.ClientCommunicationManager;
 
 import Common.EventType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,13 +22,13 @@ public class Game {
 
     private static Game game;
 
-    public static Game getInstance() {
+    public static Game getInstance() throws IOException {
         if (game == null)
             game = new Game();
         return game;
     }
 
-    private Game() {
+    private Game() throws IOException {
         this.players = new ArrayList<>();
         this.cardPack = new CardPack();
         this.gameInProgress = false;
@@ -57,17 +58,22 @@ public class Game {
                     timer.purge();
                     try {
                         startPlayerTimer();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException | IOException e) {
                         e.printStackTrace();
                     }
                 }
-                System.out.println("gameinprogress: " +gameInProgress);
+                try {
+                    notifyPlayers("Game in progress: "+gameInProgress);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         };
     }
 
-    public void addPlayer(Player player){
+    public void addPlayer(Player player) throws IOException {
         players.add(player);
+        notifyConcretePlayer(player.getId(), "Your money: "+player.getMoney());
     }
 
     public void removePlayer(Player player){
@@ -83,15 +89,17 @@ public class Game {
         return playerScore > dealerScore && playerScore <= 21;
     }
 
-    public void updateMoneyAmounts(){
+    public void updateMoneyAmounts() throws IOException {
         for(Player player : players){
             System.out.println("Money BEFORE player: "+ player.getMoney() + " dealer: " + dealer.getMoney());
             if(playerWon(player)){
                 player.increaseMoney(player.getBet() * 2);
                 dealer.increaseMoney(-player.getBet());
+                notifyConcretePlayer(player.getId(), "Congratulations! You won "+(player.getBet() * 2)+ ". Your money: "+player.getMoney());
             }
             else {
                 dealer.increaseMoney(player.getBet());
+                notifyConcretePlayer(player.getId(), "Sorry you lost. Try again." + "Your money: "+player.getMoney());
             }
             System.out.println("Money AFTER player: "+ player.getMoney() + " dealer: " + dealer.getMoney());
         }
@@ -113,7 +121,7 @@ public class Game {
         timer.scheduleAtFixedRate(setupGameTimer(), GAME_WAITING_TIME, GAME_WAITING_TIME);
     }
 
-    private void startPlayerTimer() throws InterruptedException {
+    private void startPlayerTimer() throws InterruptedException, IOException {
         this.timer = new Timer("PlayerTimer");
 
 
@@ -121,7 +129,7 @@ public class Game {
             currentPlayer = player;
             System.out.println("Current player: " +        currentPlayer.getId() + " cards: "+ currentPlayer.showCards()+" responded: " + currentPlayer.responded());
             currentPlayer.putCardIntoHand(cardPack.getRandomCard());
-            currentPlayer.setResponded(true);
+            notifyConcretePlayer(currentPlayer.getId(), "Your cards: "+currentPlayer.showCards() + "\n Dealer cards: "+dealer.showCards());
             timer = new Timer(String.valueOf(currentPlayer.getId()));
             timer.scheduleAtFixedRate(setupPlayerTimer(), PLAYER_WAITING_TIME, PLAYER_WAITING_TIME);
             while (!currentPlayer.responded()){
@@ -153,11 +161,26 @@ public class Game {
 //        System.out.println("number Of players: " +        players.size());
 
         System.out.println("----Game ended----");
+        notifyPlayers("Game ended. Place your bets!");
         startGame();
     }
 
     public void bet(Player player, int amount){
+        player.bet(amount);
+    }
 
+    private void notifyPlayers(String message) throws IOException {
+        ClientCommunicationManager.getInstance().broadcastStatusMessage(message);
+    }
+
+    private void notifyConcretePlayer(UUID id, String message) throws IOException {
+        if(id != dealer.getId()) {
+            ClientCommunicationManager.getInstance().sendMessageToClient(id, message);
+        }
+    }
+
+    public boolean isGameInProgress(){
+        return gameInProgress;
     }
 
 

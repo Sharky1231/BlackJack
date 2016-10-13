@@ -71,12 +71,12 @@ public class Reactor implements IReactor {
                     if (key.isAcceptable()) {
                         IEventHandler handler =
                                 registeredHandlers.get(EventType.CONNECT);
-                        Handle handle = new Handle(new MessageWrapper(EventType.CONNECT, null), serverSocket, null);
+                        Handle handle = new Handle(new MessageWrapper(null, EventType.CONNECT, null), serverSocket, null);
                         handler.handleEvent(handle);
 
                     } else if (key.isReadable()) {
                         SocketChannel client = (SocketChannel) key.channel();
-                        ByteBuffer buffer = ByteBuffer.allocate(1500);
+                        ByteBuffer buffer = ByteBuffer.allocate(2000);
                         client.read(buffer);
                         MessageWrapper wrapper = (MessageWrapper) Serializer.deserialize(buffer.array());
 

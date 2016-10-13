@@ -1,10 +1,12 @@
 package Client;
 
+import Common.Messages.ClientToServer.BetMessage;
 import Common.Messages.ClientToServer.JoinMessage;
 import Common.Messages.MessageWrapper;
 import Common.EventType;
 import Common.Messages.ServerToClient.StatusMessage;
 import Common.Serializer;
+import sun.security.krb5.internal.HostAddress;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -23,6 +25,8 @@ public class ClientController {
     // include here client id and send it with every request?
 
     private static UUID clientId = UUID.randomUUID();
+    private SocketChannel client;
+    private InetSocketAddress hostAddress;
 
     public ClientController(ClientView view){
         this.view = view;
@@ -32,14 +36,14 @@ public class ClientController {
     private void connect() throws IOException, InterruptedException {
         int portNumber = 6666;
 
-        InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
-        SocketChannel client = SocketChannel.open(hostAddress);
+        hostAddress = new InetSocketAddress("localhost", portNumber);
+        client = SocketChannel.open(hostAddress);
         client.configureBlocking(false);
 
         System.out.println("Client sending messages to server...Client id: " + clientId);
 
         JoinMessage msg = new JoinMessage(clientId);
-        MessageWrapper wrapper = new MessageWrapper(EventType.JOIN, msg);
+        MessageWrapper wrapper = new MessageWrapper(clientId, EventType.JOIN, msg);
 
         byte[] message = Serializer.serialize(wrapper);
         ByteBuffer buffer = ByteBuffer.wrap(message);
@@ -85,11 +89,25 @@ public class ClientController {
 
                                 if (receivedByteArray.length > 0) {
                                     MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
+                                    EventType eventType = messageWrapper.getEventType();
+                                    switch(eventType){
+                                        case STATUS: {
+                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
+                                            view.addText(statusMessage.getUpdateString());
+                                            break;
+                                        }
+                                        case SUCCESS:{
+                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
+                                            view.clientBettedButtons();
+                                            view.addText(statusMessage.getUpdateString());
+                                            break;
+                                        }
 
-                                    if (messageWrapper.getEventType().equals(EventType.STATUS)) {
-                                        StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
-
-                                        view.addText(statusMessage.getUpdateString());
+                                        case NOT_SUCCESS:{
+                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
+                                            view.addText(statusMessage.getUpdateString());
+                                            break;
+                                        }
                                     }
                                 }
 
@@ -104,6 +122,13 @@ public class ClientController {
 
         });
         t1.start();
+    }
+
+    public void sendMessage(MessageWrapper wrapper) throws IOException {
+        byte[] message = Serializer.serialize(wrapper);
+        ByteBuffer buffer = ByteBuffer.wrap(message);
+        client.write(buffer);
+        buffer.clear();
     }
 
 
@@ -125,8 +150,9 @@ public class ClientController {
             System.exit(0);
         }
         else if (((JButton) e.getSource()).getText().startsWith("Bet")) {
-            view.addText("Bet");
-            view.clientBetted();
+            sendMessage(new MessageWrapper(clientId, EventType.BET, new BetMessage(view.getBet())));
+
+//            view.clientBettedButtons();
         }
         else if (((JButton) e.getSource()).getText().startsWith("Another card")) {
             view.addText("Another card");

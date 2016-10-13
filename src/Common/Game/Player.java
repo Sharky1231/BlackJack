@@ -21,6 +21,15 @@ public class Player {
         this.cards = new ArrayList<>();
     }
 
+    public Player(UUID id) {
+        this.id = id;
+        this.money = 100;
+        this.bet = 0;
+        this.responded = false;
+        this.score = new Points();
+        this.cards = new ArrayList<>();
+    }
+
     public void putCardIntoHand(Card card){
         cards.add(card);
         score.update(card);

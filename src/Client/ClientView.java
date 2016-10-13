@@ -39,11 +39,10 @@ public class ClientView extends JFrame {
         betButton.setEnabled(true);
     }
 
-    public void clientBetted()
+    public void clientBettedButtons()
     {
         anotherCardButton.setEnabled(true);
         stayButton.setEnabled(true);
-
         betButton.setEnabled(false);
     }
 
@@ -197,6 +196,13 @@ public class ClientView extends JFrame {
         betButton.addActionListener(listener);
         stayButton.addActionListener(listener);
         leaveButton.addActionListener(listener);
+    }
+
+    public int getBet(){
+        if(!betButton.getText().isEmpty()) {
+            return Integer.parseInt(betField.getText());
+        }
+        return 0;
     }
 
     private class ButtonHandler implements ActionListener {
