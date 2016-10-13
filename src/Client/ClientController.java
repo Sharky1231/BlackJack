@@ -32,126 +32,93 @@ public class ClientController {
     private void connect() throws IOException, InterruptedException {
         int portNumber = 6666;
 
-        try {
-//            InetAddress serverAddress = InetAddress.getByName("localhost");
-//
-//            Socket kkSocket = new Socket(serverAddress, portNumber);
-//            Scanner userInput = new Scanner(System.in);
-//            PrintWriter out = new PrintWriter(kkSocket.getOutputStream(), true);
-//            BufferedReader in = new BufferedReader(
-//                    new InputStreamReader(kkSocket.getInputStream()));
-//
-//            view.addText("Connected!");
-//            out.println("Client connected.");
-            InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
-            SocketChannel client = SocketChannel.open(hostAddress);
-            client.configureBlocking(false);
+        InetSocketAddress hostAddress = new InetSocketAddress("localhost", portNumber);
+        SocketChannel client = SocketChannel.open(hostAddress);
+        client.configureBlocking(false);
 
-            System.out.println("Client sending messages to server...Client id: " + clientId);
+        System.out.println("Client sending messages to server...Client id: " + clientId);
 
-            JoinMessage msg = new JoinMessage(clientId);
-            MessageWrapper wrapper = new MessageWrapper(EventType.JOIN, msg);
+        JoinMessage msg = new JoinMessage(clientId);
+        MessageWrapper wrapper = new MessageWrapper(EventType.JOIN, msg);
 
-            byte [] message = Serializer.serialize(wrapper);
-            ByteBuffer buffer = ByteBuffer.wrap(message);
-            System.out.println(message);
-            client.write(buffer);
-            buffer.clear();
+        byte[] message = Serializer.serialize(wrapper);
+        ByteBuffer buffer = ByteBuffer.wrap(message);
+        System.out.println(message);
+        client.write(buffer);
+        buffer.clear();
 
 
-            // Selector: multiplexor of SelectableChannel objects
-            Selector selector = Selector.open(); // selector is open here
+        // Selector: multiplexor of SelectableChannel objects
+        Selector selector = Selector.open(); // selector is open here
 
-            int ops = client.validOps();
+        int ops = client.validOps();
 
-            SelectionKey selectKy = client.register(selector, ops, null);
+        SelectionKey selectKy = client.register(selector, ops, null);
 
 
-            Thread t1 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
+        Thread t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-                        // Infinite loop..
-                        // Keep client running
-                        while (true) {
+                    // Infinite loop..
+                    // Keep client running
+                    while (true) {
 
-                            // Selects a set of keys whose corresponding channels are ready for I/O operations
-                            selector.select();
+                        // Selects a set of keys whose corresponding channels are ready for I/O operations
+                        selector.select();
 
-                            // token representing the registration of a SelectableChannel with a Selector
-                            Set<SelectionKey> keys = selector.selectedKeys();
-                            Iterator<SelectionKey> iterator = keys.iterator();
+                        // token representing the registration of a SelectableChannel with a Selector
+                        Set<SelectionKey> keys = selector.selectedKeys();
+                        Iterator<SelectionKey> iterator = keys.iterator();
 
-                            while (iterator.hasNext()) {
-                                SelectionKey myKey = iterator.next();
+                        while (iterator.hasNext()) {
+                            SelectionKey myKey = iterator.next();
 
-                                if (myKey.isReadable()) {
+                            if (myKey.isReadable()) {
 
-                                    SocketChannel clientChannel = (SocketChannel) myKey.channel();
-                                    ByteBuffer serverBuffer = ByteBuffer.allocate(1000);
-                                    clientChannel.read(serverBuffer);
+                                SocketChannel clientChannel = (SocketChannel) myKey.channel();
+                                ByteBuffer serverBuffer = ByteBuffer.allocate(1000);
+                                clientChannel.read(serverBuffer);
 
-                                    byte[] receivedByteArray = serverBuffer.array();
+                                byte[] receivedByteArray = serverBuffer.array();
 
-                                    if (receivedByteArray.length > 0) {
-                                        MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
+                                if (receivedByteArray.length > 0) {
+                                    MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
 
-                                        if (messageWrapper.getEventType().equals(EventType.STATUS)) {
-                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
+                                    if (messageWrapper.getEventType().equals(EventType.STATUS)) {
+                                        StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
 
-                                            view.addText(statusMessage.getUpdateString());
-                                        }
+                                        view.addText(statusMessage.getUpdateString());
                                     }
-
                                 }
-                                iterator.remove();
+
                             }
+                            iterator.remove();
                         }
-                    } catch (Exception e) {
-
                     }
+                } catch (Exception e) {
+                    view.addText("Exception occured in selector thread. " + e.getMessage());
                 }
+            }
 
-            } );
-            t1.start();
-//            while ( true ) {
-//
-//                ByteBuffer serverBuffer = ByteBuffer.allocate(1500);
-//                client.read(serverBuffer);
-//
-//                byte[] receivedByteArray = serverBuffer.array();
-//
-//                if (receivedByteArray.length > 0) {
-//                    //MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
-//
-//                    System.out.println(new String(receivedByteArray));
-//                }
-//            }
-
-//            // Send messages to server
-//            String [] messages = new String [] {"Time goes fast.", "What now?", "Bye."};
-//            for (int i = 0; i < messages.length; i++) {
-//                byte [] message = new String(messages [i]).getBytes();
-//                ByteBuffer buffer = ByteBuffer.wrap(message);
-//                client.write(buffer);
-//                System.out.println(messages [i]);
-//                buffer.clear();
-//                Thread.sleep(3000);
-//            }
-
-        }
-
-        catch (Exception e){
-            view.addText("Error occurred: " + e.getMessage());
-        }
+        });
+        t1.start();
     }
+
 
 
     public void handleButtonEvent(ActionEvent e) throws IOException, InterruptedException {
         if (((JButton) e.getSource()).getText().startsWith("Join game")) {
             view.addText("Connecting to the game...");
-            connect();
+            try {
+                connect();
+                view.clientJoined();
+            }
+            catch (Exception ex)
+            {
+                view.addText("Exception occured while connecting. " + ex.getMessage());
+            }
         }
         else if (((JButton) e.getSource()).getText().startsWith("Exit")) {
             view.addText("Disconnected.");
@@ -159,12 +126,15 @@ public class ClientController {
         }
         else if (((JButton) e.getSource()).getText().startsWith("Bet")) {
             view.addText("Bet");
+            view.clientBetted();
         }
         else if (((JButton) e.getSource()).getText().startsWith("Another card")) {
             view.addText("Another card");
+
         }
         else if (((JButton) e.getSource()).getText().startsWith("Stay")) {
             view.addText("Stay");
+            view.clientStayed();
         }
     }
 }
