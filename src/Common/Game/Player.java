@@ -69,6 +69,10 @@ public class Player {
         cards = new ArrayList<>();
     }
 
+    public void resetPonts(){
+        score = new Points();
+    }
+
     public String showCards(){
         String string = "";
         for(Card card : cards){

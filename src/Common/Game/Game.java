@@ -76,13 +76,16 @@ public class Game {
 
     public boolean playerWon(Player player){
         int playerScore = player.getScore().getPoints();
+//        System.out.println("playerscore: high: " + player.getScore().getHighPoints() + " low: "+player.getScore().getLowPoints() + " used: " +playerScore);
         int dealerScore = dealer.getScore().getPoints();
+//        System.out.println("dealerscore: high: " + dealer.getScore().getHighPoints() + " low: "+dealer.getScore().getLowPoints() + " used: " +dealerScore);
 
-        return playerScore > dealerScore;
+        return playerScore > dealerScore && playerScore <= 21;
     }
 
     public void updateMoneyAmounts(){
         for(Player player : players){
+            System.out.println("Money BEFORE player: "+ player.getMoney() + " dealer: " + dealer.getMoney());
             if(playerWon(player)){
                 player.increaseMoney(player.getBet() * 2);
                 dealer.increaseMoney(-player.getBet());
@@ -90,6 +93,7 @@ public class Game {
             else {
                 dealer.increaseMoney(player.getBet());
             }
+            System.out.println("Money AFTER player: "+ player.getMoney() + " dealer: " + dealer.getMoney());
         }
     }
 
@@ -116,16 +120,15 @@ public class Game {
         for(Player player : players){
             currentPlayer = player;
             System.out.println("Current player: " +        currentPlayer.getId() + " cards: "+ currentPlayer.showCards()+" responded: " + currentPlayer.responded());
-//            System.out.println("Current player cards: " +        currentPlayer.showCards());
-//            System.out.println("Current player: " +        currentPlayer.getId());
             currentPlayer.putCardIntoHand(cardPack.getRandomCard());
+            currentPlayer.setResponded(true);
             timer = new Timer(String.valueOf(currentPlayer.getId()));
             timer.scheduleAtFixedRate(setupPlayerTimer(), PLAYER_WAITING_TIME, PLAYER_WAITING_TIME);
             while (!currentPlayer.responded()){
                 Thread.sleep(500);
             }
-            currentPlayer.setResponded(false);
             System.out.println("Current player: " +        currentPlayer.getId() + " cards: "+ currentPlayer.showCards()+" responded: " + currentPlayer.responded());
+            currentPlayer.setResponded(false);
             timer.cancel();
             timer.purge();
         }
@@ -135,10 +138,13 @@ public class Game {
         for(Player player : players){
             System.out.println("Player won: " +playerWon(player)+ " playerid: "+player.getId());
         }
+        updateMoneyAmounts();
 
         for(Player player : players){
             player.resetCards();
+            player.resetPonts();
         }
+
         System.out.println("Cards reset.");
         // decide winners and deal money
         // reset cards
