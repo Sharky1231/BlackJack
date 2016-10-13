@@ -23,43 +23,29 @@ public class ServerController {
     public void startServer()
     {
         try{
-            Thread t1 = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Reactor reactor = Reactor.getInstance();
-                        Game game = Game.getInstance();
-                        game.startGame();
-                        ConnectionHandler connectionHandler = new ConnectionHandler();
-                        GameHandler gameHandler = new GameHandler();
+            Thread serverThread = new Thread(() -> {
+                try {
+                    Reactor reactor = Reactor.getInstance();
+                    Game game = Game.getInstance();
+                    game.startGame();
 
-                        reactor.register_handler(EventType.CONNECT, connectionHandler);
-                        reactor.register_handler(EventType.JOIN, gameHandler);
-                        reactor.register_handler(EventType.BET, gameHandler);
+                    // The view is only passed for the debugging/displaying purposes
+                    ConnectionHandler connectionHandler = new ConnectionHandler(view);
+                    GameHandler gameHandler = new GameHandler(view);
 
-                        reactor.handle_events();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    reactor.register_handler(EventType.CONNECT, connectionHandler);
+                    reactor.register_handler(EventType.JOIN, gameHandler);
+                    reactor.register_handler(EventType.BET, gameHandler);
+                    reactor.register_handler(EventType.STAND, gameHandler);
+                    reactor.register_handler(EventType.HIT, gameHandler);
 
+                    reactor.handle_events();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+
             });
-            t1.start();
-
-
-
-//            Socket clientSocket = serverSocket.accept();
-//            PrintWriter out =
-//                    new PrintWriter(clientSocket.getOutputStream(), true);
-//            BufferedReader in = new BufferedReader(
-//                    new InputStreamReader(clientSocket.getInputStream()));
-
-//            String inputLine, outputLine;
-//
-//            // Initiate conversation with client
-//            GameProtocol kkp = new GameProtocol();
-//            outputLine = kkp.processInput(null);
-//            out.println(outputLine);
+            serverThread.start();
         }
         catch (Exception e){
             view.addText("Error occurred: " + e.getMessage());

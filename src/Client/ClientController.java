@@ -27,15 +27,14 @@ public class ClientController {
     private static UUID clientId = UUID.randomUUID();
     private SocketChannel client;
     private InetSocketAddress hostAddress;
+    private int portNumber = 6666;
 
-    public ClientController(ClientView view){
+    public ClientController(ClientView view) {
         this.view = view;
         view.registerEvents(this);
     }
 
     private void connect() throws IOException, InterruptedException {
-        int portNumber = 6666;
-
         hostAddress = new InetSocketAddress("localhost", portNumber);
         client = SocketChannel.open(hostAddress);
         client.configureBlocking(false);
@@ -44,84 +43,85 @@ public class ClientController {
 
         JoinMessage msg = new JoinMessage(clientId);
         MessageWrapper wrapper = new MessageWrapper(clientId, EventType.JOIN, msg);
-
-        byte[] message = Serializer.serialize(wrapper);
-        ByteBuffer buffer = ByteBuffer.wrap(message);
-        System.out.println(message);
-        client.write(buffer);
-        buffer.clear();
-
+        sendMessage(wrapper);
 
         // Selector: multiplexor of SelectableChannel objects
         Selector selector = Selector.open(); // selector is open here
-
         int ops = client.validOps();
-
         SelectionKey selectKy = client.register(selector, ops, null);
 
 
-        Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
+        Thread clientMessageReadingThread = new Thread(() -> {
+            try {
+                // Infinite loop..
+                // Keep client running
+                while (true) {
 
-                    // Infinite loop..
-                    // Keep client running
-                    while (true) {
+                    // Selects a set of keys whose corresponding channels are ready for I/O operations
+                    selector.select();
 
-                        // Selects a set of keys whose corresponding channels are ready for I/O operations
-                        selector.select();
+                    // token representing the registration of a SelectableChannel with a Selector
+                    Set<SelectionKey> keys = selector.selectedKeys();
+                    Iterator<SelectionKey> iterator = keys.iterator();
 
-                        // token representing the registration of a SelectableChannel with a Selector
-                        Set<SelectionKey> keys = selector.selectedKeys();
-                        Iterator<SelectionKey> iterator = keys.iterator();
+                    while (iterator.hasNext()) {
+                        SelectionKey myKey = iterator.next();
 
-                        while (iterator.hasNext()) {
-                            SelectionKey myKey = iterator.next();
+                        if (myKey.isReadable()) {
 
-                            if (myKey.isReadable()) {
+                            SocketChannel clientChannel = (SocketChannel) myKey.channel();
+                            ByteBuffer serverBuffer = ByteBuffer.allocate(1000);
+                            clientChannel.read(serverBuffer);
 
-                                SocketChannel clientChannel = (SocketChannel) myKey.channel();
-                                ByteBuffer serverBuffer = ByteBuffer.allocate(1000);
-                                clientChannel.read(serverBuffer);
+                            byte[] receivedByteArray = serverBuffer.array();
 
-                                byte[] receivedByteArray = serverBuffer.array();
+                            if (receivedByteArray.length > 0) {
+                                MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
+                                EventType eventType = messageWrapper.getEventType();
 
-                                if (receivedByteArray.length > 0) {
-                                    MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
-                                    EventType eventType = messageWrapper.getEventType();
-                                    switch(eventType){
-                                        case STATUS: {
-                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
-                                            view.addText(statusMessage.getUpdateString());
-                                            break;
-                                        }
-                                        case SUCCESS:{
-                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
-                                            view.clientBettedButtons();
-                                            view.addText(statusMessage.getUpdateString());
-                                            break;
-                                        }
-
-                                        case NOT_SUCCESS:{
-                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
-                                            view.addText(statusMessage.getUpdateString());
-                                            break;
-                                        }
-                                    }
-                                }
-
+                                handleMessageEvent(eventType, messageWrapper);
                             }
-                            iterator.remove();
+
                         }
+                        iterator.remove();
                     }
-                } catch (Exception e) {
-                    view.addText("Exception occured in selector thread. " + e.getMessage());
                 }
+            } catch (Exception e) {
+                view.addText("Exception occured in selector thread. " + e.getMessage());
+            }
+        });
+        clientMessageReadingThread.start();
+    }
+
+    private void handleMessageEvent(EventType eventType, MessageWrapper wrapper) {
+        StatusMessage statusMessage = (StatusMessage) wrapper.getMessage();
+        switch (eventType) {
+            case STATUS: {
+                view.addText(statusMessage.getUpdateString());
+                break;
+            }
+            case SUCCESS: {
+                view.clientBettedButtons();
+                view.addText(statusMessage.getUpdateString());
+                break;
             }
 
-        });
-        t1.start();
+            case NOT_SUCCESS: {
+                view.addText(statusMessage.getUpdateString());
+                break;
+            }
+
+            case GAME_FINISHED: {
+                view.gameRestartButtons();
+                view.addText(statusMessage.getUpdateString());
+                break;
+            }
+            case CARD_REQUESTED: {
+                view.addText(statusMessage.getUpdateString());
+                break;
+            }
+
+        }
     }
 
     public void sendMessage(MessageWrapper wrapper) throws IOException {
@@ -132,33 +132,30 @@ public class ClientController {
     }
 
 
+    public void handleButtonEvent(ActionEvent actionEvent) throws IOException, InterruptedException {
+        try {
+            handleAction(actionEvent);
+        } catch (Exception ex) {
+            view.addText("Exception occured while connecting. " + ex.getMessage());
+        }
+    }
 
-    public void handleButtonEvent(ActionEvent e) throws IOException, InterruptedException {
+    private void handleAction(ActionEvent e) throws IOException, InterruptedException {
         if (((JButton) e.getSource()).getText().startsWith("Join game")) {
             view.addText("Connecting to the game...");
-            try {
-                connect();
-                view.clientJoined();
-            }
-            catch (Exception ex)
-            {
-                view.addText("Exception occured while connecting. " + ex.getMessage());
-            }
-        }
-        else if (((JButton) e.getSource()).getText().startsWith("Exit")) {
+            connect();
+            view.clientJoined();
+        } else if (((JButton) e.getSource()).getText().startsWith("Exit")) {
             view.addText("Disconnected.");
             System.exit(0);
-        }
-        else if (((JButton) e.getSource()).getText().startsWith("Bet")) {
+        } else if (((JButton) e.getSource()).getText().startsWith("Bet")) {
             sendMessage(new MessageWrapper(clientId, EventType.BET, new BetMessage(view.getBet())));
-
-//            view.clientBettedButtons();
-        }
-        else if (((JButton) e.getSource()).getText().startsWith("Another card")) {
+        } else if (((JButton) e.getSource()).getText().startsWith("Another card")) {
+            sendMessage(new MessageWrapper(clientId, EventType.HIT, null));
             view.addText("Another card");
 
-        }
-        else if (((JButton) e.getSource()).getText().startsWith("Stay")) {
+        } else if (((JButton) e.getSource()).getText().startsWith("Stay")) {
+            sendMessage(new MessageWrapper(clientId, EventType.STAND, null));
             view.addText("Stay");
             view.clientStayed();
         }

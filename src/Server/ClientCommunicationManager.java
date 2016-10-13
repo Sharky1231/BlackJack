@@ -64,6 +64,10 @@ public class ClientCommunicationManager {
         sendMessageToChannel(socketChannel, message);
     }
 
+    public void sendMessageToClient(UUID id, EventType eventType, String message) throws IOException {
+        sendMessageToClient(id, new MessageWrapper(null, eventType, new StatusMessage(message)));
+    }
+
     public void broadcastStatusMessage(String status) throws IOException {
         broadcastMessage(new MessageWrapper(EventType.STATUS, new StatusMessage(status)));
     }

@@ -37,6 +37,7 @@ public class ClientView extends JFrame {
     {
         joinButton.setEnabled(false);
         betButton.setEnabled(true);
+        betField.setEnabled(true);
     }
 
     public void clientBettedButtons()
@@ -44,7 +45,17 @@ public class ClientView extends JFrame {
         anotherCardButton.setEnabled(true);
         stayButton.setEnabled(true);
         betButton.setEnabled(false);
+        betField.setEnabled(false);
     }
+
+    public void gameRestartButtons(){
+        stayButton.setEnabled(false);
+        anotherCardButton.setEnabled(false);
+        betButton.setEnabled(true);
+        betField.setEnabled(true);
+    }
+
+
 
     public void clientStayed()
     {
@@ -76,7 +87,7 @@ public class ClientView extends JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         joinButton.setText("Join game");
-
+        betField.setEnabled(false);
         leaveButton.setText("Exit");
 
         betButton.setText("Bet");

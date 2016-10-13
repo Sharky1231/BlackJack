@@ -10,62 +10,72 @@ import Common.Messages.ServerToClient.StatusMessage;
 import Server.ClientCommunicationManager;
 import Server.Reactor.Handle;
 import Server.Reactor.Interfaces.IEventHandler;
+import Server.ServerView;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class GameHandler implements IEventHandler {
+
+    private ServerView view;
+
+    public GameHandler(ServerView view) {
+        this.view = view;
+    }
+
     @Override
     public void handleEvent(Handle handle) throws IOException {
         EventType eventType = handle.getMessageWrapper().getEventType();
-        switch (eventType){
-            case JOIN:{
-                JoinMessage message = (JoinMessage)handle.getMessageWrapper().getMessage();
-                System.out.println("JOIN EVENT EXECUTED. New client with id: " + message.getClientId() + " joined.");
+        switch (eventType) {
+            case JOIN: {
+                JoinMessage message = (JoinMessage) handle.getMessageWrapper().getMessage();
 
                 UUID clientId = message.getClientId();
                 ClientCommunicationManager.getInstance().addClient(clientId, handle.getClientChannel());
+                String statusMessage = "New client joined the game. Client ID: " + clientId;
 
-                // Add player in BET event?
-//                Game.getInstance().addPlayer(new Player(clientId));
-                try {
-                    String statusMessage = "New client joined the game. Client ID: " + clientId;
-                    ClientCommunicationManager.getInstance().broadcastStatusMessage(statusMessage);;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                view.addText(statusMessage);
+                ClientCommunicationManager.getInstance().broadcastStatusMessage(statusMessage);
+                ;
                 break;
-
             }
-            case BET:{
-                MessageWrapper wrapper = (MessageWrapper) handle.getMessageWrapper();
+            case BET: {
+                MessageWrapper wrapper = handle.getMessageWrapper();
                 BetMessage betMessage = (BetMessage) wrapper.getMessage();
                 String messageToClient = "";
 
-                if(Game.getInstance().isGameInProgress()){
-                    messageToClient = "Game is in progress";
+                if (Game.getInstance().isGameInProgress()) {
+                    messageToClient = "Sorry, game is in progress.";
                     ClientCommunicationManager.getInstance().sendMessageToClient(wrapper.getSenderId(), new MessageWrapper(EventType.NOT_SUCCESS, new StatusMessage(messageToClient)));
-                }
-                else {
+                    view.addText("Client " + wrapper.getSenderId() + " failed to BET. Reason: " + messageToClient);
+                } else {
                     messageToClient = "You have have successfully bet: " + betMessage.getAmount();
                     Player player = new Player(wrapper.getSenderId());
-                    Game.getInstance().addPlayer(player);
+
+                    if (!Game.getInstance().isInGame(player.getId())) {
+                        Game.getInstance().addPlayer(player);
+                    }
                     Game.getInstance().bet(player, betMessage.getAmount());
                     ClientCommunicationManager.getInstance().sendMessageToClient(wrapper.getSenderId(), new MessageWrapper(EventType.SUCCESS, new StatusMessage(messageToClient)));
+                    view.addText("Client " + wrapper.getSenderId() + " successfully bet  " + betMessage.getAmount());
                 }
                 break;
             }
-
-            // SEND UUID WITH EACH MESSAGE
-            case HIT:{
-                System.out.println("shit");
+            case HIT: {
+                MessageWrapper wrapper = handle.getMessageWrapper();
+                Game.getInstance().hit(wrapper.getSenderId());
+                view.addText("Client " + wrapper.getSenderId() + " HIT.");
+                ClientCommunicationManager.getInstance().sendMessageToClient(wrapper.getSenderId(), new MessageWrapper(EventType.CARD_REQUESTED, new StatusMessage(Game.getInstance().showCards())));
                 break;
             }
-            case STAND:{
-                System.out.println("oh no");
+            case STAND: {
+                MessageWrapper wrapper = handle.getMessageWrapper();
+                Game.getInstance().stand(wrapper.getSenderId());
+                view.addText("Client " + wrapper.getSenderId() + " STAND.");
                 break;
             }
-            default: break;
+            default:
+                break;
         }
     }
 }

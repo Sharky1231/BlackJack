@@ -7,6 +7,7 @@ import Server.ClientCommunicationManager;
 import Server.Reactor.Handle;
 import Server.Reactor.Interfaces.IEventHandler;
 import Server.Reactor.Reactor;
+import Server.ServerView;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -14,6 +15,13 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 public class ConnectionHandler implements IEventHandler {
+
+    // For displaying purposes
+    private ServerView view;
+
+    public ConnectionHandler(ServerView view){
+        this.view = view;
+    }
 
     @Override
     public void handleEvent(Handle handle) throws IOException {
@@ -27,10 +35,12 @@ public class ConnectionHandler implements IEventHandler {
 
                 client.register(Reactor.getInstance().getDemultiplexer(), SelectionKey.OP_READ);
 
-                System.out.println("Accepted new connection from client: " + client);
+                view.addText("Accepted new connection from client: " + client);
                 break;
             }
             default: break;
         }
     }
+
+
 }

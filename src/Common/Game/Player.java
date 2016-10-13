@@ -42,7 +42,6 @@ public class Player {
     public void bet(int amount){
         if(bet < amount) {
             this.bet = amount;
-            this.money -= bet;
         }
     }
 
