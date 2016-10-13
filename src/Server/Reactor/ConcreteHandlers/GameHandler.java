@@ -3,16 +3,15 @@ package Server.Reactor.ConcreteHandlers;
 import Common.EventType;
 import Common.Game.Game;
 import Common.Game.Player;
-import Common.Messages.BetMessage;
-import Common.Messages.JoinMessage;
+import Common.Messages.ClientToServer.BetMessage;
+import Common.Messages.ClientToServer.JoinMessage;
 import Common.Messages.MessageWrapper;
+import Common.Messages.ServerToClient.StatusMessage;
 import Server.ClientCommunicationManager;
 import Server.Reactor.Handle;
 import Server.Reactor.Interfaces.IEventHandler;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 import java.util.UUID;
 
 public class GameHandler implements IEventHandler {
@@ -30,22 +29,10 @@ public class GameHandler implements IEventHandler {
                 // Add the new connection to the selector
                 Game.getInstance().addPlayer(new Player(clientId, 100));
                 try {
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.JOIN, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.BET, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.JOIN, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.JOIN, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.JOIN, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.BET, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.BET, new BetMessage(55)));
-                    Thread.sleep(200);
-                    ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.BET, new BetMessage(55)));
-                } catch (InterruptedException e) {
+                    String statusMessage = "New client joined the table. Client ID: " + clientId;
+                    //ClientCommunicationManager.getInstance().sendMessageToClient(clientId, new MessageWrapper( EventType.JOIN, new BetMessage(55)));
+                    ClientCommunicationManager.getInstance().broadcastMessage(new MessageWrapper(EventType.STATUS, new StatusMessage(statusMessage)));
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;

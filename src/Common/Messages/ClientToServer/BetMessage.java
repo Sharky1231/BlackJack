@@ -1,4 +1,4 @@
-package Common.Messages;
+package Common.Messages.ClientToServer;
 
 import java.io.Serializable;
 

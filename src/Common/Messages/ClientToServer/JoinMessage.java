@@ -1,4 +1,4 @@
-package Common.Messages;
+package Common.Messages.ClientToServer;
 
 /**
  * Created by stefa on 10/12/2016.

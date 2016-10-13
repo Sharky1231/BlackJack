@@ -87,7 +87,7 @@ public class Reactor implements IReactor {
 
                         //client.write(buffer);
 
-                        client.close();
+                        //client.close();
                         System.out.println("Client messages are complete; close.");
                     }
                     iter.remove();

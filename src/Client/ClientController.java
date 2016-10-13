@@ -1,9 +1,9 @@
 package Client;
 
-import Common.Messages.BetMessage;
-import Common.Messages.JoinMessage;
+import Common.Messages.ClientToServer.JoinMessage;
 import Common.Messages.MessageWrapper;
 import Common.EventType;
+import Common.Messages.ServerToClient.StatusMessage;
 import Common.Serializer;
 
 import javax.swing.*;
@@ -97,7 +97,11 @@ public class ClientController {
                                     if (receivedByteArray.length > 0) {
                                         MessageWrapper messageWrapper = (MessageWrapper) Serializer.deserialize(receivedByteArray);
 
-                                        view.addText(messageWrapper.getEventType().toString());
+                                        if (messageWrapper.getEventType().equals(EventType.STATUS)) {
+                                            StatusMessage statusMessage = (StatusMessage) messageWrapper.getMessage();
+
+                                            view.addText(statusMessage.getUpdateString());
+                                        }
                                     }
 
                                 }
