@@ -52,18 +52,6 @@ public class ClientCommunicationManager {
         }
     }
 
-    private void sendMessageToChannel ( SocketChannel socketChannel, MessageWrapper message ) throws IOException {
-        byte [] byteMessage = Serializer.serialize(message);
-        ByteBuffer buffer = ByteBuffer.wrap(byteMessage);
-
-        socketChannel.write(buffer);
-        buffer.clear();
-    }
-
-    public void sendMessageToClient(SocketChannel socketChannel, MessageWrapper message) throws IOException {
-        sendMessageToChannel(socketChannel, message);
-    }
-
     public void sendMessageToClient(UUID id, EventType eventType, String message) throws IOException {
         sendMessageToClient(id, new MessageWrapper(null, eventType, new StatusMessage(message)));
     }
@@ -72,4 +60,11 @@ public class ClientCommunicationManager {
         broadcastMessage(new MessageWrapper(EventType.STATUS, new StatusMessage(status)));
     }
 
+    private void sendMessageToChannel ( SocketChannel socketChannel, MessageWrapper message ) throws IOException {
+        byte [] byteMessage = Serializer.serialize(message);
+        ByteBuffer buffer = ByteBuffer.wrap(byteMessage);
+
+        socketChannel.write(buffer);
+        buffer.clear();
+    }
 }

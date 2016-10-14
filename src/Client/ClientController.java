@@ -45,7 +45,7 @@ public class ClientController {
         MessageWrapper wrapper = new MessageWrapper(clientId, EventType.JOIN, msg);
         sendMessage(wrapper);
 
-        // Selector: multiplexor of SelectableChannel objects
+        // Selector: multiplexer of SelectableChannel objects
         Selector selector = Selector.open(); // selector is open here
         int ops = client.validOps();
         SelectionKey selectKy = client.register(selector, ops, null);

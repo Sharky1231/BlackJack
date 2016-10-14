@@ -219,10 +219,6 @@ public class Game {
         ClientCommunicationManager.getInstance().broadcastStatusMessage(message);
     }
 
-    private void notifyPlayers(MessageWrapper wrapper) throws IOException {
-        ClientCommunicationManager.getInstance().broadcastMessage(wrapper);
-    }
-
     private void notifyConcretePlayer(UUID id, String message) throws IOException {
         if (id != dealer.getId()) {
             ClientCommunicationManager.getInstance().sendMessageToClient(id, message);

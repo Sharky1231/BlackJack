@@ -49,7 +49,7 @@ public class GameHandler implements IEventHandler {
                     ClientCommunicationManager.getInstance().sendMessageToClient(wrapper.getSenderId(), new MessageWrapper(EventType.NOT_SUCCESS, new StatusMessage(messageToClient)));
                     view.addText("Client " + wrapper.getSenderId() + " failed to BET. Reason: " + messageToClient);
                 } else {
-                    messageToClient = "You have have successfully bet: " + betMessage.getAmount();
+                    messageToClient = "You have have successfully betted: " + betMessage.getAmount();
                     Player player = new Player(wrapper.getSenderId());
 
                     if (!Game.getInstance().isInGame(player.getId())) {
