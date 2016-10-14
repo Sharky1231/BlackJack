@@ -6,6 +6,7 @@ import Common.EventType;
 import Common.Serializer;
 import Server.Reactor.Interfaces.IEventHandler;
 import Server.Reactor.Interfaces.IReactor;
+import com.sun.corba.se.spi.activation.Server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,13 +18,13 @@ public class Reactor implements IReactor {
 
     private static Reactor reactor;
     private Map<EventType, IEventHandler> registeredHandlers;
+    private ServerSocketChannel serverSocketChannel;
     private Selector demultiplexer;
 
     private Reactor() throws IOException {
         this.registeredHandlers = new HashMap<>();
         this.demultiplexer = Selector.open();
     }
-
 
     public static Reactor getInstance() throws IOException {
         if (reactor == null)
@@ -47,15 +48,16 @@ public class Reactor implements IReactor {
         registeredHandlers.remove(eventType, handler);
     }
 
+    public void setServerSocket ( ServerSocketChannel serverSocketChannel ) throws ClosedChannelException {
+        this.serverSocketChannel = serverSocketChannel;
+
+        int ops = serverSocketChannel.validOps();
+        this.serverSocketChannel.register(demultiplexer, ops, null);
+    }
+
     @Override
     public void handle_events() throws IOException {
         try {
-            ServerSocketChannel serverSocket = ServerSocketChannel.open();
-            InetSocketAddress hostAddress = new InetSocketAddress("localhost", 6666);
-            serverSocket.bind(hostAddress);
-            serverSocket.configureBlocking(false);
-            int ops = serverSocket.validOps();
-            SelectionKey selectKy = serverSocket.register(demultiplexer, ops, null);
 
             while (true) {
                 System.out.println("Waiting for select...");
@@ -71,7 +73,7 @@ public class Reactor implements IReactor {
                     if (key.isAcceptable()) {
                         IEventHandler handler =
                                 registeredHandlers.get(EventType.CONNECT);
-                        Handle handle = new Handle(new MessageWrapper(null, EventType.CONNECT, null), serverSocket, null);
+                        Handle handle = new Handle(new MessageWrapper(null, EventType.CONNECT, null), serverSocketChannel, null);
                         handler.handleEvent(handle);
 
                     } else if (key.isReadable()) {

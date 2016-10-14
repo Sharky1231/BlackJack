@@ -10,6 +10,8 @@ import Server.Reactor.Reactor;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
 
 public class ServerController {
 
@@ -20,12 +22,19 @@ public class ServerController {
         view.registerEvents(this);
     }
 
-    public void startServer()
-    {
+    public void startServer() throws IOException {
+
+        //create the server socket
+        ServerSocketChannel serverSocket = ServerSocketChannel.open();
+        InetSocketAddress hostAddress = new InetSocketAddress("localhost", 6666);
+        serverSocket.bind(hostAddress);
+        serverSocket.configureBlocking(false);
+
         try{
             Thread serverThread = new Thread(() -> {
                 try {
                     Reactor reactor = Reactor.getInstance();
+                    reactor.setServerSocket(serverSocket);
                     Game game = Game.getInstance();
                     game.startGame();
 
@@ -55,8 +64,14 @@ public class ServerController {
     public void handleButtonEvent(ActionEvent e) {
         if (((JButton) e.getSource()).getText().startsWith("START")) {
             view.addText("Server is warming up...");
-            startServer();
-            view.addText("Server started!");
+            try {
+                startServer();
+                view.addText("Server started!");
+            }
+            catch ( Exception ex )
+            {
+                view.addText("There was an error while staring the server. " + ex.getMessage());
+            }
         }
         else if (((JButton) e.getSource()).getText().startsWith("EXIT")) {
             view.addText("Server shuts down.");

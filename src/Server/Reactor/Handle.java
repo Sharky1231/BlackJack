@@ -19,7 +19,6 @@ public class Handle {
         this.clientChannel = clientChannel;
     }
 
-
     public MessageWrapper getMessageWrapper(){
         return wrapper;
     }
