@@ -77,7 +77,7 @@ public class Player {
         cards = new ArrayList<>();
     }
 
-    public void resetPonts(){
+    public void resetPoints(){
         score = new Points();
     }
 

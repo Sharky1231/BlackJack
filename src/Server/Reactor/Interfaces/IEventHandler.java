@@ -7,5 +7,5 @@ import java.nio.channels.SelectionKey;
 
 public interface IEventHandler {
 
-    void handleEvent(Handle handle) throws IOException;
+    void handleEvent(Handle handle) throws IOException, InterruptedException;
 }

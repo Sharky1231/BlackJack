@@ -22,7 +22,7 @@ public class ServerController {
         view.registerEvents(this);
     }
 
-    public void startServer() throws IOException {
+    public void startServer() throws IOException, InterruptedException {
 
         //create the server socket
         ServerSocketChannel serverSocket = ServerSocketChannel.open();
@@ -61,7 +61,7 @@ public class ServerController {
         }
     }
 
-    public void handleButtonEvent(ActionEvent e) {
+    public void handleButtonEvent(ActionEvent e) throws InterruptedException {
         if (((JButton) e.getSource()).getText().startsWith("START")) {
             view.addText("Server is warming up...");
             try {

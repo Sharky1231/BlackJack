@@ -24,7 +24,7 @@ public class ConnectionHandler implements IEventHandler {
     }
 
     @Override
-    public void handleEvent(Handle handle) throws IOException {
+    public void handleEvent(Handle handle) throws IOException, InterruptedException {
         EventType eventType = handle.getMessageWrapper().getEventType();
 
         switch (eventType) {

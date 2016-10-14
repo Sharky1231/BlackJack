@@ -3,6 +3,8 @@ package Server;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServerView extends JFrame {
     private javax.swing.JScrollPane jScrollPane1;
@@ -11,15 +13,38 @@ public class ServerView extends JFrame {
     private javax.swing.JButton stopButton;
     private javax.swing.JTextArea textArea;
 
+    private BlockingQueue<Runnable> dispatchQueue = new LinkedBlockingQueue<Runnable>();
+
     public ServerView() {
         initComponents();
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(startButton);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        dispatchQueue.take().run();
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+        }
+        ).start();
     }
 
 
-    public void addText(String text){
-        textArea.append(text + " \n");
+    public void addText(String text) throws InterruptedException {
+
+        dispatchQueue.put(new Runnable() {
+                              @Override
+                              public void run() {
+                                  textArea.append(text + " \n");
+                              }
+                          }
+        );
     }
 
     public void registerEvents(ServerController controller) {
@@ -30,16 +55,21 @@ public class ServerView extends JFrame {
 
     private class ButtonHandler implements ActionListener {
         ServerController controller;
+
         public ButtonHandler(ServerController controller) {
             this.controller = controller;
         }
 
         public void actionPerformed(ActionEvent event) {
-            controller.handleButtonEvent(event);
+            try {
+                controller.handleButtonEvent(event);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void open(){
+    public void open() {
         setVisible(true);
     }
 

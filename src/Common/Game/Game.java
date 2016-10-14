@@ -1,7 +1,6 @@
 package Common.Game;
 
 import Common.EventType;
-import Common.Messages.MessageWrapper;
 import Server.ClientCommunicationManager;
 
 import java.io.IOException;
@@ -126,7 +125,7 @@ public class Game {
     private void resetHands() {
         for (Player player : players) {
             player.resetCards();
-            player.resetPonts();
+            player.resetPoints();
         }
     }
 
