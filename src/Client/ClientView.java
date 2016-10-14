@@ -106,18 +106,6 @@ public class ClientView extends JFrame {
         textArea.setRows(5);
         jScrollPane1.setViewportView(textArea);
 
-        jLabel1.setText("Timer:");
-
-        timerLabel.setText("0");
-
-        jLabel2.setText("Players:");
-
-        playersLabel.setText("0");
-
-        jLabel3.setText("Money:");
-
-        moneyLabel.setText("0");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
