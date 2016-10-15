@@ -39,7 +39,6 @@ public class Reactor implements IReactor {
 
     @Override
     public void register_handler(EventType eventType, IEventHandler handler) {
-        //Handle handle = handler.getHandle();
         registeredHandlers.put(eventType, handler);
     }
 
@@ -87,9 +86,6 @@ public class Reactor implements IReactor {
                         Handle handle = new Handle(wrapper, null, client);
                         handler.handleEvent(handle);
 
-                        //client.write(buffer);
-
-                        //client.close();
                         System.out.println("Client messages are complete; close.");
                     }
                     iter.remove();

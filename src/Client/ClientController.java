@@ -22,7 +22,6 @@ import java.util.UUID;
 
 public class ClientController {
     private ClientView view;
-    // include here client id and send it with every request?
 
     private static UUID clientId = UUID.randomUUID();
     private SocketChannel client;
@@ -46,10 +45,9 @@ public class ClientController {
         sendMessage(wrapper);
 
         // Selector: multiplexer of SelectableChannel objects
-        Selector selector = Selector.open(); // selector is open here
+        Selector selector = Selector.open();
         int ops = client.validOps();
-        SelectionKey selectKy = client.register(selector, ops, null);
-
+        client.register(selector, ops, null);
 
         Thread clientMessageReadingThread = new Thread(() -> {
             try {
@@ -81,13 +79,12 @@ public class ClientController {
 
                                 handleMessageEvent(eventType, messageWrapper);
                             }
-
                         }
                         iterator.remove();
                     }
                 }
             } catch (Exception e) {
-                view.addText("Exception occured in selector thread. " + e.getMessage());
+                view.addText("Exception occurred in selector thread. " + e.getMessage());
             }
         });
         clientMessageReadingThread.start();
@@ -120,7 +117,6 @@ public class ClientController {
                 view.addText(statusMessage.getUpdateString());
                 break;
             }
-
         }
     }
 
@@ -136,7 +132,7 @@ public class ClientController {
         try {
             handleAction(actionEvent);
         } catch (Exception ex) {
-            view.addText("Exception occured while connecting. " + ex.getMessage());
+            view.addText("Exception occurred while connecting. " + ex.getMessage());
         }
     }
 

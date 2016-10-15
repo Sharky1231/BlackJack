@@ -41,6 +41,4 @@ public class ConnectionHandler implements IEventHandler {
             default: break;
         }
     }
-
-
 }

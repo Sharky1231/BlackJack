@@ -22,24 +22,9 @@ public class Points {
         }
     }
 
-    public int getLowPoints(){
-        return lowPoints;
-    }
-
-    public int getHighPoints(){
-        return highPoints;
-    }
-
     public int getPoints(){
         if(highPoints < 21)
             return highPoints;
         return lowPoints;
-    }
-
-    public String showPoints(){
-        if (lowPoints == highPoints)
-            return String.valueOf(lowPoints);
-
-        return String.valueOf(lowPoints) + "/" + String.valueOf(highPoints);
     }
 }

@@ -14,11 +14,7 @@ public class Card {
         return value;
     }
 
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public String toString(){
+    public String toString() {
         return symbol;
     }
 }

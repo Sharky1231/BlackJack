@@ -36,7 +36,7 @@ public class GameHandler implements IEventHandler {
 
                 view.addText(statusMessage);
                 ClientCommunicationManager.getInstance().broadcastStatusMessage(statusMessage);
-                ;
+
                 break;
             }
             case BET: {

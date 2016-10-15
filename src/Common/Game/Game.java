@@ -80,7 +80,6 @@ public class Game {
     }
 
     private void startGameTimer() throws IOException {
-//        notifyPlayers("----Game starts----");
         this.timer = new Timer("GameTimer");
         timer.scheduleAtFixedRate(setupGameTimer(), GAME_WAITING_TIME, GAME_WAITING_TIME);
     }
